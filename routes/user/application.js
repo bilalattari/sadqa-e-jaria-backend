@@ -27,6 +27,7 @@ router.post("/", authorize(["user"]), async (req, res) => {
       applicationId: application._id,
       role: "user",
       userId: req.user.id,
+      performedBy: req.user.id,
       action: "submitted",
       comments: "Application submitted.",
     });
@@ -58,16 +59,14 @@ router.get("/token/:token", async (req, res) => {
         .json({ error: true, msg: "Application not found." });
     }
 
-    res
-      .status(200)
-      .json({
-        error: false,
-        data: application,
-        msg: "Application retrieved successfully.",
-      });
+    res.status(200).json({
+      error: false,
+      data: application,
+      msg: "Application retrieved successfully.",
+    });
   } catch (error) {
     res.status(500).json({ error: true, msg: "Internal server error." });
   }
 });
 
-export default router
+export default router;

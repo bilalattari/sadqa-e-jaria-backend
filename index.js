@@ -15,10 +15,7 @@ const app = express();
 app.use(morgan("dev"));
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("Connected to MongoDB", process.env.MONGODB_URI);
   })
@@ -36,9 +33,6 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bo
 app.get("/", (req, res) => {
   res.send(new Date());
 });
-
-
-
 
 app.use("/api", userRoutes);
 app.use("/api/admin", adminRoutes);
