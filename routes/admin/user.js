@@ -4,9 +4,18 @@ import authorize from "../../middleware/authorize.js";
 
 const router = express.Router();
 
-router.post("/create-user", authorize(["admin"]), async (req, res) => {
-  const { fullname, email, role, profileImage, country, city, area, cnic } =
-    req.body;
+router.post("/create-user",  async (req, res) => {
+  const {
+    fullname,
+    email,
+    role,
+    password,
+    profileImage,
+    country,
+    city,
+    area,
+    cnic,
+  } = req.body;
 
   if (!fullname || !email || !role) {
     return res
@@ -37,8 +46,8 @@ router.post("/create-user", authorize(["admin"]), async (req, res) => {
       country,
       city,
       area,
-      cnic,
-      password: "defaultpassword", // Optional, can be updated later
+      password,
+      cnic
     });
 
     await newUser.save();
