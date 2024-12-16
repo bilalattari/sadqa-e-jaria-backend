@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post("/", authorize(["user"]), async (req, res) => {
   const { category, subCategory, form } = req.body;
-  const token = crypto.randomBytes(16).toString("hex");
+  const token = crypto.randomBytes(3).toString("hex");
 
   try {
     const application = new Application({
