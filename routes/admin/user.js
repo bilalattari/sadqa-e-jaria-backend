@@ -4,7 +4,26 @@ import authorize from "../../middleware/authorize.js";
 
 const router = express.Router();
 
-router.post("/create-user",  async (req, res) => {
+router.get(
+  "/get-all-users",
+  authorize(["admin", "department-hod"]),
+  async (req, res) => {
+    try {
+      const users = await User.find();
+      res
+        .status(200)
+        .json({
+          error: false,
+          data: users,
+          msg: "Users retrieved successfully.",
+        });
+    } catch (error) {
+      res.status(500).json({ error: true, msg: "Internal server error." });
+    }
+  }
+);
+
+router.post("/create-user", async (req, res) => {
   const {
     fullname,
     email,
@@ -47,7 +66,7 @@ router.post("/create-user",  async (req, res) => {
       city,
       area,
       password,
-      cnic
+      cnic,
     });
 
     await newUser.save();

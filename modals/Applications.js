@@ -10,6 +10,8 @@ const applicationSchema = new mongoose.Schema(
       enum: [
         "pending",
         "in-review",
+        "hold",
+        "returned",
         "inquiry",
         "committee-review",
         "approved",
