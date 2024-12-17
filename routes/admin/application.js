@@ -6,6 +6,57 @@ import authorize from "../../middleware/authorize.js";
 const router = express.Router();
 
 /**
+ * @route GET /api/applications/filter
+ * @desc Retrieve all applications with filters
+ * @access Admin, Trustee
+ */
+router.get("/filter", authorize(["admin", "trustee"]), async (req, res) => {
+  console.log("Request chal gye he??");
+  const {
+    startDate,
+    endDate,
+    country,
+    city,
+    category,
+    subCategory,
+    status,
+    officerId,
+    page,
+    perPage,
+  } = req.query;
+
+  const filters = {};
+
+  if (startDate && endDate) {
+    filters.createdAt = {
+      $gte: new Date(startDate),
+      $lte: new Date(endDate),
+    };
+  }
+  if (country) filters["form.country"] = country;
+  if (city) filters["form.city"] = city;
+  if (category) filters.category = category;
+  if (subCategory) filters.subCategory = subCategory;
+  if (status) filters.status = status;
+  if (officerId) filters["inquiryReport.officerId"] = officerId;
+
+  try {
+    const applications = await Application.find(filters)
+      .populate("submittedBy", "fullname email")
+      .populate("inquiryReport.officerId", "fullname email");
+
+    res.status(200).json({
+      error: false,
+      data: applications,
+      msg: "Filtered applications retrieved successfully.",
+    });
+  } catch (error) {
+    console.log("error=>", error);
+    res.status(500).json({ error: true, msg: "Internal server error." });
+  }
+});
+
+/**
  * @route GET /api/applications/:id
  * @desc View application details along with transaction history
  * @access User, Admin, Department HOD, Inquiry Officer, Trustee
@@ -16,7 +67,7 @@ router.get(
   async (req, res) => {
     try {
       const application = await Application.findById(req.params.id)
-        .populate("submittedBy", "fullname email city area")
+        .populate("submittedBy", "fullname email")
         .populate("lastUpdatedBy", "fullname email");
 
       if (!application) {
@@ -27,7 +78,7 @@ router.get(
 
       const transactions = await Transaction.find({
         applicationId: application._id,
-      }).populate("userId", "fullname role");
+      }).populate("performedBy", "fullname role");
 
       res.status(200).json({
         error: false,
@@ -35,6 +86,7 @@ router.get(
         msg: "Application details and history retrieved successfully.",
       });
     } catch (error) {
+      console.log("error==>", error);
       res.status(500).json({ error: true, msg: "Internal server error." });
     }
   }
@@ -264,57 +316,6 @@ router.get(
         error: false,
         data: applications,
         msg: "Assigned applications retrieved successfully.",
-      });
-    } catch (error) {
-      res.status(500).json({ error: true, msg: "Internal server error." });
-    }
-  }
-);
-
-/**
- * @route GET /api/applications/filter
- * @desc Retrieve all applications with filters
- * @access Admin, Trustee
- */
-router.get(
-  "/applications/filter",
-  authorize(["admin", "trustee"]),
-  async (req, res) => {
-    const {
-      startDate,
-      endDate,
-      country,
-      city,
-      category,
-      subCategory,
-      status,
-      officerId,
-    } = req.query;
-
-    const filters = {};
-
-    if (startDate && endDate) {
-      filters.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    }
-    if (country) filters["form.country"] = country;
-    if (city) filters["form.city"] = city;
-    if (category) filters.category = category;
-    if (subCategory) filters.subCategory = subCategory;
-    if (status) filters.status = status;
-    if (officerId) filters["inquiryReport.officerId"] = officerId;
-
-    try {
-      const applications = await Application.find(filters)
-        .populate("submittedBy", "fullname email")
-        .populate("inquiryReport.officerId", "fullname email");
-
-      res.status(200).json({
-        error: false,
-        data: applications,
-        msg: "Filtered applications retrieved successfully.",
       });
     } catch (error) {
       res.status(500).json({ error: true, msg: "Internal server error." });
