@@ -1,7 +1,15 @@
 import jwt from "jsonwebtoken";
 import User from "../modals/Users.js"; // Replace with your user model
 
-// Middleware to verify token and roles
+/**
+ * @typedef {"user"| "department-hod"| "trustee"| "inquiry-officer"| "admin"} UserRoles
+ */
+
+/**
+ *
+ * @param {UserRoles[]} requiredRoles
+ * @description Middleware function to check if the user has the required role
+ */
 const authorize = (requiredRoles) => {
   return async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1]; // Extract token from the Authorization header

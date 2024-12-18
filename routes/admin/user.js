@@ -10,15 +10,49 @@ router.get(
   async (req, res) => {
     try {
       const users = await User.find();
-      res
-        .status(200)
-        .json({
-          error: false,
-          data: users,
-          msg: "Users retrieved successfully.",
-        });
+      res.status(200).json({
+        error: false,
+        data: users,
+        msg: "Users retrieved successfully.",
+      });
     } catch (error) {
       res.status(500).json({ error: true, msg: "Internal server error." });
+    }
+  }
+);
+
+/**
+ * @route GET /api/admin/users/get-users-by-role
+ * @desc Retrieve users by role
+ * @access Admin, Department HOD
+ *
+ * @example GET /api/admin/user/get-users-by-roles?roles=["admin", "department-hod"]
+ */
+
+router.get(
+  "/get-users-by-roles",
+  authorize(["admin", "department-hod"]),
+  async (req, res) => {
+    const rolesParam = req.query.roles;
+
+    if (!rolesParam)
+      return res.status(400).json({ error: true, msg: "Roles not provided." });
+
+    try {
+      const roles = JSON.parse(rolesParam);
+      const users = await User.find({
+        role: {
+          $in: roles,
+        },
+      });
+      res.status(200).json({
+        error: false,
+        data: users,
+        msg: "Users retrieved successfully.",
+      });
+    } catch (error) {
+      res.status(500).json({ error: true, msg: "Internal server error." });
+      console.log("error fetching users by roles==>", error);
     }
   }
 );
