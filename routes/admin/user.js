@@ -77,7 +77,9 @@ router.post("/create-user", async (req, res) => {
   }
 
   if (
-    !["department-hod", "trustee", "inquiry-officer", "admin"].includes(role)
+    !["department-hod", "trustee", "inquiry-officer", "admin", "user"].includes(
+      role
+    )
   ) {
     return res.status(400).json({ error: true, msg: "Invalid role." });
   }
