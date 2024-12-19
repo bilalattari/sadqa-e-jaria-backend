@@ -15,6 +15,7 @@ const transactionSchema = new mongoose.Schema(
         "fund-approved",
         "fund-rejected",
         "fund-disbursed",
+        "assigned-to-inquiry",
       ],
       required: true,
     },

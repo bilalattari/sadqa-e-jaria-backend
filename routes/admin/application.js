@@ -11,7 +11,6 @@ const router = express.Router();
  * @access Admin, Trustee
  */
 router.get("/filter", authorize(["admin", "trustee"]), async (req, res) => {
-  console.log("Request chal gye he??");
   const {
     startDate,
     endDate,
@@ -43,7 +42,8 @@ router.get("/filter", authorize(["admin", "trustee"]), async (req, res) => {
   try {
     const applications = await Application.find(filters)
       .populate("submittedBy", "fullname email")
-      .populate("inquiryReport.officerId", "fullname email");
+      .populate("inquiryReport.officerId", "fullname email")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       error: false,
@@ -68,7 +68,11 @@ router.get(
     try {
       const application = await Application.findById(req.params.id)
         .populate("submittedBy", "fullname email")
-        .populate("lastUpdatedBy", "fullname email");
+        .populate("lastUpdatedBy", "fullname email")
+        .populate({
+          path: "inquiryReport.officerId", // Specify the nested path
+          select: "fullname email", // Fields to include
+        });
 
       if (!application) {
         return res
@@ -120,6 +124,7 @@ router.patch(
 
       const transaction = new Transaction({
         applicationId: application._id,
+        performedBy: req.user.id,
         role: "department-hod",
         userId: req.user.id,
         action: "assigned-to-inquiry",
@@ -134,6 +139,7 @@ router.patch(
         msg: "Inquiry officer assigned successfully.",
       });
     } catch (error) {
+      console.log("error=>", error);
       res.status(500).json({ error: true, msg: "Internal server error." });
     }
   }
